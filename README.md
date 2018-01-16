@@ -149,3 +149,6 @@ dogStatsD.histogram("app.TestApp.Histogram", value);
 The next stage is for us to implement sending events to DataDog, over UDP and TCP.
 We mentioned at the start that in the future the library will likely require
 dependencies and this is the reason why.
+
+# Contributions
+If you wish to contribute to this project, then great, check our [contribution guidelines](CONTRIBUTING.md)
