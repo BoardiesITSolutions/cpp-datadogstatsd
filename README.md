@@ -15,7 +15,7 @@ There is a simple makefile to allow you to build a so library file that you can
 link against. At this time, there should be any dependencies required in order
 to build and run the library, although this will likely change in the future
 (check what's next for more info). If you build successfully you should get
-/libDataDogStats.so.x.x.x.x (x.x.x.x being the version number) 
+libDataDogStats.so.x.x.x.x (x.x.x.x being the version number) 
 
 How you link to the library is up to you, but for our installation we 
 did the following:
