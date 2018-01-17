@@ -249,7 +249,6 @@ void DataDogStatsD::send(std::map<string, string> data, float sampleRate, string
 void DataDogStatsD::flush(string& udp_message)
 {
 #ifndef _WIN32
-	cout << "Sending " << udp_message << endl;
 
 	int udp_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	/*struct sockaddr_in sin;
@@ -271,23 +270,10 @@ void DataDogStatsD::flush(string& udp_message)
 		cout << "Failed to bind UDP port" << endl;
 	}*/
 
-	int connect_result = connect(udp_socket, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
-	if (connect_result < 0)
-	{
-		cout << "Failed to connect" << endl;
-		cout << "Error: " << strerror(connect_result) << endl;
-	}
+	connect(udp_socket, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
 
-	int sentBytes = write(udp_socket, udp_message.c_str(), udp_message.length());
-	if (sentBytes >= 0)
-	{
-		cout << "Sent " << sentBytes << "bytes" << endl;
-	}
-	else
-	{
-		cout << "Failed to send data" << endl;
-		cout << "Error: " << strerror(sentBytes) << endl;
-	}
+	write(udp_socket, udp_message.c_str(), udp_message.length());
+	
 
 	close(udp_socket);
 #else
