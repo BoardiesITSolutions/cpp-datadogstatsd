@@ -1,4 +1,4 @@
-SOURCES = DataDogStatsD.cpp Helpers.cpp
+SOURCES = DataDogStatsD.cpp DDEvent.cpp Helpers.cpp
 
 lib_name = libDataDogStatsD.so.1.0.0.0
 

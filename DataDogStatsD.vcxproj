@@ -86,10 +86,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DataDogStatsD.cpp" />
+    <ClCompile Include="DDEvent.cpp" />
     <ClCompile Include="Helpers.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DataDogStatsD.h" />
+    <ClInclude Include="DDEvent.h" />
     <ClInclude Include="Helpers.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -14,6 +14,7 @@
 #include <string.h>
 #include "Helpers.h"
 #include <time.h>
+#include "DDEvent.h"
 #ifndef _WIN32
 #include <sys/time.h>
 #include <unistd.h>
@@ -61,6 +62,9 @@ public:
 	std::string returnSerializedTagsString(std::string tags);
 	std::string returnSerializedTagsString(std::vector<std::string> tags);
 	std::string returnSerializedTagsString(std::map<std::string, std::string> tags);
+
+
+	void event(DDEvent& ddEvent);
 	
 	long getTimeInMicroSeconds();
 private:
