@@ -148,7 +148,7 @@ void DataDogStatsD::gauge(std::string stats, float value, std::string tags)
 
 	std::map<std::string, std::string> data;
 	data[stats] = valueStream.str();
-	this->send(data, 1.0);
+	this->send(data, 1.0, tags);
 }
 
 void DataDogStatsD::histogram(std::string stats, float value)
