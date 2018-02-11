@@ -293,7 +293,7 @@ or via our [support portal](https://support.boardiesitsolutions.com).
 
 If using our support portal, then, for general help, please submit a support ticket at 
 https://support.boardiesitsolutions.com/support/ or if you are reporting a bug/issue then please
-submit it via https://support.boardiesitsolutions.com/issues/index.php. 
+submit it via our issue tracker at https://support.boardiesitsolutions.com/issues/index.php. 
 
 # Contributions
 If you wish to contribute to this project, then great, check our [contribution guidelines](CONTRIBUTING.md)
