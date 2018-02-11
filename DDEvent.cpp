@@ -65,7 +65,24 @@ void DDEvent::setAggregationKey(string aggregationKey)
 
 void DDEvent::setTags(string tags)
 {
+
 	this->tags = tags;
+}
+
+void DDEvent::setTags(std::map<string, string> tags)
+{
+
+	for (auto const &iter : tags)
+	{
+		stringstream tag_string;
+		tag_string << iter.first << ":" << iter.second;
+		this->tagsList.push_back(tag_string.str());
+	}
+}
+
+void DDEvent::setTags(std::vector<string> tags)
+{
+	this->tagsList = tags;
 }
 
 /// <summary>Return the DDEvent object in the encoded format required for DataDog UDP Event Submissions</summary>
@@ -125,6 +142,67 @@ string DDEvent::returnDDEventUDPString()
 	return outputString.str();
 }
 
+void DDEvent::getDDEventAsJSONString(std::string *jsonString)
+{
+	rapidjson::Document document;
+	document.SetObject();
+	rapidjson::Document::AllocatorType& allocator = document.GetAllocator();
+	document.AddMember("title", this->title, allocator);
+	if (!this->text.empty())
+	{
+		document.AddMember("text", this->text, allocator);
+	}
+	if (!this->dateHappened.empty())
+	{
+		document.AddMember("date_happened", this->dateHappened, allocator);
+	}
+	if (this->priority != DDEvent::Priority::NOT_SET)
+	{
+		document.AddMember("priority", this->getPriorityStringFromEnum(this->priority), allocator);
+	}
+	if (this->alertType != DDEvent::AlertType::NOT_SET)
+	{
+		document.AddMember("alert_type", this->getAlertTypeStringFromEnum(this->alertType), allocator);
+	}
+	if (!this->host.empty())
+	{
+
+		document.AddMember("host", this->host, allocator);
+	}
+	if (!this->aggregationKey.empty())
+	{
+		document.AddMember("aggregation_key", this->aggregationKey, allocator);
+	}
+
+	//If a basic string has been set as a tag, and the tags list hasn't been set, then add the string to the vector
+	if (!this->tags.empty() && this->tagsList.size() == 0)
+	{
+		this->tagsList.push_back(this->tags);
+	}
+
+	if (this->tagsList.size() > 0)
+	{
+		rapidjson::Value tagsJSONArray(rapidjson::kArrayType);
+
+		for (auto const &iter : this->tagsList)
+		{
+			rapidjson::Value jsonString;
+			jsonString.SetString(iter.c_str(), iter.length(), allocator);
+			tagsJSONArray.PushBack(jsonString, allocator);
+		}
+
+		document.AddMember("tags", tagsJSONArray, allocator);
+	}
+
+	rapidjson::StringBuffer buffer;
+	buffer.Clear();
+	rapidjson::Writer<rapidjson::StringBuffer>writer(buffer);
+	document.Accept(writer);
+	
+	*jsonString = buffer.GetString();
+
+}
+
 std::string DDEvent::getPriorityStringFromEnum(DDEvent::Priority priority)
 {
 	switch (priority)
@@ -144,7 +222,7 @@ std::string DDEvent::getAlertTypeStringFromEnum(DDEvent::AlertType alertType)
 	{
 		case AlertType::INFO:
 			return "info";
-		case AlertType::ERROR:
+		case AlertType::DD_ERROR:
 			return "error";
 		case AlertType::SUCCESS:
 			return "success";
