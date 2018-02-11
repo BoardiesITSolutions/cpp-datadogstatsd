@@ -14,6 +14,9 @@
 #include <string.h>
 #include "Helpers.h"
 #include <time.h>
+#include "DDEvent.h"
+#include <thread>
+
 #ifndef _WIN32
 #include <sys/time.h>
 #include <unistd.h>
@@ -30,6 +33,7 @@ class DataDogStatsD
 {
 public:
 	DataDogStatsD();
+	~DataDogStatsD();
 	DataDogStatsD(std::string api_key, std::string app_key);
 	DataDogStatsD(std::string host, unsigned int port);
 	DataDogStatsD(std::string api_key, std::string app_key, std::string host);
@@ -61,6 +65,12 @@ public:
 	std::string returnSerializedTagsString(std::string tags);
 	std::string returnSerializedTagsString(std::vector<std::string> tags);
 	std::string returnSerializedTagsString(std::map<std::string, std::string> tags);
+
+
+	void event(DDEvent& ddEvent);
+	bool event(DDEvent ddEvent, bool nonBlockingMode, void(*eventCallback)(bool result, std::string error) = nullptr);
+
+	void(*eventCallback)(bool, std::string);
 	
 	long getTimeInMicroSeconds();
 private:
@@ -68,13 +78,14 @@ private:
 	std::string app_key;
 	std::string host;
 	unsigned int port;
-	//void updateStats(std::string stats);
 	void updateStats(std::vector<std::string> stats, int delta = 1, float sampleRate = 1.0, std::string tags = "");
 	void send(std::map<std::string, std::string> data, float sampleRate = 1.0, std::string tags = "");
 	void flush(std::string& udp_message);
-	//std::string serialiseTags(void * tags);
-	//std::string serialiseTags(std::string *tags);
-	//std::string serialiseTags(std::vector<std::string> *tags);
+	void sendDDEventinthread(DDEvent ddEvent, void(*eventCallback)(bool result, std::string error));
+	static size_t curlResponseWriteCallback(void *contents, size_t size, size_t nmemb, void *userp);
+	std::thread *http_event_thread = NULL;
+	CURL *initCurl(DDEvent ddEvent, std::string *response, struct curl_slist *list, const char* jsonString);
+	bool httpEventThreadStarted = false;
 };
 
 #endif

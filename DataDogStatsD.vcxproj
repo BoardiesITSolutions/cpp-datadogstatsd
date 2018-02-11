@@ -65,10 +65,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <NMakeOutput>DataDogStatsD.exe</NMakeOutput>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <IncludePath>C:\Users\Chris\Documents\C++ Libs\rapidjson-1.1.0\include;C:\Users\Chris\Documents\C++ Libs\curl-7.50.3-win64-mingw\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Chris\Documents\C++ Libs\curl-7.50.3-win64-mingw\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <NMakeOutput>DataDogStatsD.exe</NMakeOutput>
     <NMakePreprocessorDefinitions>_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <IncludePath>D:\Documents\C++ Libs\rapidjson-1.1.0\include;D:\Documents\C++ Libs\curl-7.50.3-win64-mingw\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\Documents\C++ Libs\curl-7.50.3-win64-mingw\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <NMakeOutput>DataDogStatsD.exe</NMakeOutput>
@@ -78,7 +82,10 @@
     <NMakeOutput>DataDogStatsD.exe</NMakeOutput>
     <NMakePreprocessorDefinitions>NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
-  <ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="makefile" />
@@ -86,10 +93,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DataDogStatsD.cpp" />
+    <ClCompile Include="DDEvent.cpp" />
     <ClCompile Include="Helpers.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DataDogStatsD.h" />
+    <ClInclude Include="DDEvent.h" />
     <ClInclude Include="Helpers.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

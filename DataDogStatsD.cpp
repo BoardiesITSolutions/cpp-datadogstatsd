@@ -246,6 +246,195 @@ void DataDogStatsD::send(std::map<string, string> data, float sampleRate, string
 	}
 }
 
+void DataDogStatsD::event(DDEvent& ddEvent)
+{
+	//cout << ddEvent.returnDDEventUDPString() << endl;
+	string udp_message = ddEvent.returnDDEventUDPString();
+	cout << udp_message << endl;
+	this->flush(udp_message);
+}
+
+CURL * DataDogStatsD::initCurl(DDEvent ddEvent, string *response, struct curl_slist *list, const char *jsonString)
+{
+	CURL *curl = NULL;
+
+	curl = curl_easy_init();
+	if (curl == NULL)
+	{
+		cout << "Failed to initialise curl" << endl;
+		return NULL;
+	}
+
+	list = curl_slist_append(list, "Content-Type: application/json");
+
+	stringstream dd_url_stream;
+	dd_url_stream << "https://app.datadoghq.com/api/v1/events?api_key=" << this->api_key << "&application_key=" << this->app_key;
+	string dd_url = dd_url_stream.str();
+
+
+	curl_easy_setopt(curl, CURLOPT_URL, dd_url.c_str());
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
+	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, response);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &DataDogStatsD::curlResponseWriteCallback);
+	curl_easy_setopt(curl, CURLOPT_HEADER, 0);
+	curl_easy_setopt(curl, CURLOPT_POST, 1);
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (unsigned)strlen(jsonString));
+	curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, jsonString);
+
+	return curl;
+}
+
+bool DataDogStatsD::event(DDEvent ddEvent, bool nonBlockingMode, void(*eventCallback)(bool result, string error))
+{
+	//Send the request blocking the current thread until a response is returned - don't call this too often or your app may lock
+	if (!nonBlockingMode)
+	{
+		string response;
+		struct curl_slist *list = NULL;
+		string jsonString;
+		ddEvent.getDDEventAsJSONString(&jsonString);
+		CURL *curl = this->initCurl(ddEvent, &response, list, jsonString.c_str());
+		if (curl == NULL)
+		{
+			if (eventCallback != nullptr)
+			{
+				eventCallback(false, "Failed to initialise curl");
+			}
+			return false;
+		}
+
+		CURLcode res = curl_easy_perform(curl);
+		if (res != CURLE_OK)
+		{
+			string error = curl_easy_strerror(res);
+			if (eventCallback != nullptr)
+			{
+				eventCallback(false, error);
+			}
+			curl_slist_free_all(list);
+			curl_easy_cleanup(curl);
+			
+			return false;
+		}
+		else
+		{
+			long response_code;
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+			curl_slist_free_all(list);
+			curl_easy_cleanup(curl);
+			if (eventCallback != nullptr)
+			{
+				if (response_code == 200 || response_code == 201 || response_code == 202)
+				{
+					eventCallback(true, "");
+					return true;
+				}
+				else
+				{
+					eventCallback(false, response);
+					return false;
+				}
+			}
+			else
+			{
+				if (response_code == 200 || response_code == 201 || response_code == 202)
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+		}
+	}
+	else
+	{
+		//Make sure we only have 1 thread running at a time, if the thread for the HTTP event is already running return an error
+		if (!httpEventThreadStarted)
+		{
+			//Return an error if we've got a null eventCallback function as otherwise, how you supposed to know if it failed to post the event
+			//If you're not worried whether the event post was not successful call DataDogStatsD::event(DDEvent) to send over UDP throught the agent
+			if (eventCallback == nullptr)
+			{
+				cout << "Eventcallback cannot be null if sending event in non blocking mode" << endl;
+				return false;
+			}
+			else
+			{
+				httpEventThreadStarted = true;
+				this->http_event_thread = new thread(&DataDogStatsD::sendDDEventinthread, this, ddEvent, eventCallback);
+				return true;
+			}
+		}
+		else
+		{
+			if (eventCallback != nullptr)
+			{
+				eventCallback(false, "HTTP Event thread is already sending an event, wait until the current event has been finished");
+				return false;
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
+}
+
+void DataDogStatsD::sendDDEventinthread(DDEvent ddEvent, void(*eventCallback)(bool result, string error))
+{
+	string response;
+	struct curl_slist *list = NULL;
+	string jsonString;
+	ddEvent.getDDEventAsJSONString(&jsonString);
+
+	CURL *curl = this->initCurl(ddEvent, &response, list, jsonString.c_str());
+	if (curl == NULL)
+	{
+		eventCallback(false, "Failed to initialsie curl");
+		httpEventThreadStarted = false;
+		return;
+	}
+
+	CURLcode res = curl_easy_perform(curl);
+	if (res != CURLE_OK)
+	{
+		string error = curl_easy_strerror(res);
+		eventCallback(false, error);
+		//cout << "Failed to perform curl: " << error << endl;
+		curl_slist_free_all(list);
+		curl_easy_cleanup(curl);
+		httpEventThreadStarted = false;
+		return;
+	}
+	else
+	{
+		long response_code;
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+		if (response_code == 200 || response_code == 201 || response_code == 202)
+		{
+			eventCallback(true, "");
+		}
+		else
+		{
+			eventCallback(false, response);
+		}
+		curl_slist_free_all(list);
+		curl_easy_cleanup(curl);
+		httpEventThreadStarted = false;
+		return;
+	}
+}
+
+size_t DataDogStatsD::curlResponseWriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
+{
+	((std::string*)userp)->append((char*)contents, size * nmemb);
+	return size * nmemb;
+}
+
 void DataDogStatsD::flush(string& udp_message)
 {
 #ifndef _WIN32
@@ -333,4 +522,15 @@ long DataDogStatsD::getTimeInMicroSeconds()
 #else
 	return 0;
 #endif
+}
+
+DataDogStatsD::~DataDogStatsD()
+{
+	if (this->http_event_thread != NULL)
+	{
+		this->http_event_thread->join();
+
+		delete this->http_event_thread;
+		this->http_event_thread = NULL;
+	}
 }
