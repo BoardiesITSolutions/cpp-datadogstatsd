@@ -2,12 +2,6 @@
 <a href="https://ci.boardiesitsolutions.com/viewType.html?buildTypeId=CppDatadogstatsd&guest=1">
 <img src="https://ci.boardiesitsolutions.com/app/rest/builds/buildType:(id:CppDatadogstatsd)/statusIcon"/>
 </a>
-1
-2
-3
-<a href="http://YOURTEAMCITYURL/viewType.html?buildTypeId=YOURBUILDID&guest=1">
-<img src="http://YOURTEAMCITYURL/app/rest/builds/buildType:(id:YOURBUILDID)/statusIcon"/>
-</a>
 
 # C++ DataDog StatsD Client
 
