@@ -1,5 +1,7 @@
 
-<iframe src="https://ci.boardiesitsolutions.com/externalStatus.html?buildTypeId=CppDatadogstatsd_Build"/>
+<a href="https://ci.boardiesitsolutions.com/viewType.html?buildTypeId=CppDatadogstatsd_Build&guest=1">
+<img src="https://ci.boardiesitsolutions.com/app/rest/builds/buildType:(id:CppDatadogstatsd_Build)/statusIcon"/>
+</a>
 
 # C++ DataDog StatsD Client
 
