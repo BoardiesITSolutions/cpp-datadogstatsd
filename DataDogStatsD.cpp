@@ -63,55 +63,55 @@ DataDogStatsD::DataDogStatsD(string api_key, string app_key, string host, unsign
 	this->port = port;
 }
 
-void DataDogStatsD::increment(std::string stats)
+void DataDogStatsD::increment(const std::string& stats)
 {
 	std::vector<std::string> statsArray;
 	statsArray.push_back(stats);
 	this->updateStats(statsArray, 1, 1.0, "");
 }
 
-void DataDogStatsD::increment(std::string stats, std::string tags)
+void DataDogStatsD::increment(const std::string& stats, const std::string& tags)
 {
 	std::vector<std::string> statsArray;
 	statsArray.push_back(stats);
 	this->updateStats(statsArray, 1, 1.0, tags);
 }
 
-void DataDogStatsD::increment(std::vector<std::string> stats)
+void DataDogStatsD::increment(const std::vector<std::string>& stats)
 {
 	this->updateStats(stats, 1, 1.0, "");
 }
 
-void DataDogStatsD::increment(std::vector<std::string> stats, std::string tags)
+void DataDogStatsD::increment(const std::vector<std::string>& stats, const std::string& tags)
 {
 	this->updateStats(stats, 1, 1.0, tags);
 }
 
-void DataDogStatsD::decrement(std::string stats)
+void DataDogStatsD::decrement(const std::string& stats)
 {
 	std::vector<std::string> statsArray;
 	statsArray.push_back(stats);
 	this->updateStats(statsArray, -1, 1.0, "");
 }
 
-void DataDogStatsD::decrement(std::string stats, std::string tags)
+void DataDogStatsD::decrement(const std::string& stats, const std::string& tags)
 {
 	std::vector<std::string> statsArray;
 	statsArray.push_back(stats);
 	this->updateStats(statsArray, -1, 1.0, tags);
 }
 
-void DataDogStatsD::decrement(std::vector<std::string> stats)
+void DataDogStatsD::decrement(const std::vector<std::string>& stats)
 {
 	this->updateStats(stats, -1, 1.0, "");
 }
 
-void DataDogStatsD::decrement(std::vector<std::string> stats, string tags)
+void DataDogStatsD::decrement(const std::vector<std::string>& stats, const string& tags)
 {
 	this->updateStats(stats, -1, 1.0, tags);
 }
 
-void DataDogStatsD::timing(std::string stats, float timeInSeconds)
+void DataDogStatsD::timing(const std::string& stats, float timeInSeconds)
 {
 	stringstream valueStream;
 	valueStream << (timeInSeconds) << "|ms";
@@ -120,7 +120,7 @@ void DataDogStatsD::timing(std::string stats, float timeInSeconds)
 	this->send(data, 1.0);
 }
 
-void DataDogStatsD::timing(std::string stats, float timeInSeconds, std::string tags)
+void DataDogStatsD::timing(const std::string& stats, float timeInSeconds, const std::string& tags)
 {
 	stringstream valueStream;
 	valueStream << (timeInSeconds) << "|ms";
@@ -131,7 +131,7 @@ void DataDogStatsD::timing(std::string stats, float timeInSeconds, std::string t
 
 
 
-void DataDogStatsD::gauge(std::string stats, float value)
+void DataDogStatsD::gauge(const std::string& stats, float value)
 {
 	stringstream valueStream;
 	valueStream << (value) << "|g";
@@ -141,7 +141,7 @@ void DataDogStatsD::gauge(std::string stats, float value)
 	this->send(data, 1.0);
 }
 
-void DataDogStatsD::gauge(std::string stats, float value, std::string tags)
+void DataDogStatsD::gauge(const std::string&stats, float value, const std::string& tags)
 {
 	stringstream valueStream;
 	valueStream << (value) << "|g";
@@ -151,7 +151,7 @@ void DataDogStatsD::gauge(std::string stats, float value, std::string tags)
 	this->send(data, 1.0, tags);
 }
 
-void DataDogStatsD::histogram(std::string stats, float value)
+void DataDogStatsD::histogram(const std::string& stats, float value)
 {
 	stringstream valueStream;
 	valueStream << (value) << "|h";
@@ -161,7 +161,7 @@ void DataDogStatsD::histogram(std::string stats, float value)
 	this->send(data, 1.0);
 }
 
-void DataDogStatsD::histogram(std::string stats, float value, std::string tags)
+void DataDogStatsD::histogram(const std::string& stats, float value, const std::string& tags)
 {
 	stringstream valueStream;
 	valueStream << (value) << "|h";
@@ -171,7 +171,7 @@ void DataDogStatsD::histogram(std::string stats, float value, std::string tags)
 	this->send(data, 1.0, tags);
 }
 
-void DataDogStatsD::set(std::string stats, float value)
+void DataDogStatsD::set(const std::string& stats, float value)
 {
 	stringstream valueStream;
 	valueStream << (value) << "|s";
@@ -181,7 +181,7 @@ void DataDogStatsD::set(std::string stats, float value)
 	this->send(data, 1.0);
 }
 
-void DataDogStatsD::set(std::string stats, float value, std::string tags)
+void DataDogStatsD::set(const std::string& stats, float value, const std::string& tags)
 {
 	stringstream valueStream;
 	valueStream << (value) << "|s";
@@ -191,7 +191,7 @@ void DataDogStatsD::set(std::string stats, float value, std::string tags)
 	this->send(data, 1.0, tags);
 }
 
-void DataDogStatsD::updateStats(std::vector<std::string> stats, int delta, float sampleRate, string tags)
+void DataDogStatsD::updateStats(std::vector<std::string> stats, int delta, float sampleRate, const string& tags)
 {
 	std::map<string, string> data;
 
@@ -250,7 +250,6 @@ void DataDogStatsD::event(DDEvent& ddEvent)
 {
 	//cout << ddEvent.returnDDEventUDPString() << endl;
 	string udp_message = ddEvent.returnDDEventUDPString();
-	cout << udp_message << endl;
 	this->flush(udp_message);
 }
 
@@ -465,8 +464,6 @@ void DataDogStatsD::flush(string& udp_message)
 	
 
 	close(udp_socket);
-#else
-	cout << "Sending " << udp_message << endl;
 #endif
 }
 

@@ -40,27 +40,27 @@ public:
 	DataDogStatsD(std::string api_key, std::string app_key, unsigned int port);
 	DataDogStatsD(std::string api_key, std::string app_key, std::string host, unsigned int port);
 
-	void increment(std::string stats);
-	void increment(std::string stats, std::string tags);
-	void increment(std::vector<std::string> stats);
-	void increment(std::vector<std::string> stats, std::string tags);
+	void increment(const std::string& stats);
+	void increment(const std::string& stats, const std::string& tags);
+	void increment(const std::vector<std::string>& stats);
+	void increment(const std::vector<std::string>& stats, const std::string& tags);
 
-	void decrement(std::string stats);
-	void decrement(std::string stats, std::string tags);
-	void decrement(std::vector<std::string> stats);
-	void decrement(std::vector<std::string> stats, std::string tags);
+	void decrement(const std::string& stats);
+	void decrement(const std::string& stats, const std::string& tags);
+	void decrement(const std::vector<std::string>& stats);
+	void decrement(const std::vector<std::string>& stats, const std::string& tags);
 	
-	void timing(std::string stats, float timeInSeconds);
-	void timing(std::string stats, float timeInSeconds, std::string tags);
+	void timing(const std::string& stats, float timeInSeconds);
+	void timing(const std::string& stats, float timeInSeconds, const std::string& tags);
 
-	void gauge(std::string stats, float value);
-	void gauge(std::string stats, float value, std::string tags);
+	void gauge(const std::string& stats, float value);
+	void gauge(const std::string& stats, float value, const std::string& tags);
 
-	void histogram(std::string stats, float value);
-	void histogram(std::string stats, float value, std::string tags);
+	void histogram(const std::string& stats, float value);
+	void histogram(const std::string& stats, float value, const std::string& tags);
 
-	void set(std::string stats, float value);
-	void set(std::string stats, float value, std::string tags);
+	void set(const std::string& stats, float value);
+	void set(const std::string& stats, float value, const std::string& tags);
 	
 	std::string returnSerializedTagsString(std::string tags);
 	std::string returnSerializedTagsString(std::vector<std::string> tags);
@@ -78,7 +78,7 @@ private:
 	std::string app_key;
 	std::string host;
 	unsigned int port;
-	void updateStats(std::vector<std::string> stats, int delta = 1, float sampleRate = 1.0, std::string tags = "");
+	void updateStats(const std::vector<std::string> stats, int delta = 1, float sampleRate = 1.0, const std::string& tags = "");
 	void send(std::map<std::string, std::string> data, float sampleRate = 1.0, std::string tags = "");
 	void flush(std::string& udp_message);
 	void sendDDEventinthread(DDEvent ddEvent, void(*eventCallback)(bool result, std::string error));
