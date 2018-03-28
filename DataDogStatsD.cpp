@@ -248,7 +248,6 @@ void DataDogStatsD::send(std::map<string, string> data, float sampleRate, string
 
 void DataDogStatsD::event(DDEvent& ddEvent)
 {
-	//cout << ddEvent.returnDDEventUDPString() << endl;
 	string udp_message = ddEvent.returnDDEventUDPString();
 	this->flush(udp_message);
 }
