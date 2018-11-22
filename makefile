@@ -1,6 +1,6 @@
 SOURCES = DataDogStatsD.cpp DDEvent.cpp Helpers.cpp
 
-lib_name = libDataDogStatsD.so.1.1.0.0
+lib_name = libDataDogStatsD.so.1.1.0.4
 
 curl_include = /usr/include/curl
 rapidjson_inc_path = /usr/include/rapidjson

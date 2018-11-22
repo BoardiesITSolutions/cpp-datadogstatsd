@@ -435,33 +435,43 @@ size_t DataDogStatsD::curlResponseWriteCallback(void *contents, size_t size, siz
 
 void DataDogStatsD::flush(string& udp_message)
 {
-#ifndef _WIN32
+#ifdef _WIN32
+	WSAData wsaData;
+	int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (result == 0)
+	{
+		SOCKET sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+		sockaddr_in service;
+		service.sin_family = AF_INET;
+		service.sin_addr.s_addr = inet_addr(this->host.c_str());
+		service.sin_port = htons(this->port);
+		//result = ::bind(sock, (SOCKADDR *)&service, sizeof(service));
+		result = ::connect(sock, (SOCKADDR *)&service, sizeof(service));
+		if (result != SOCKET_ERROR)
+		{
+			::send(sock, udp_message.c_str(), udp_message.length(), 0);
+			closesocket(sock);
+			WSACleanup();
+		}
+	}
+	else
+	{
+		WSACleanup();
+	}
+#else
 
 	int udp_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	/*struct sockaddr_in sin;
-
-	sin.sin_family = AF_INET;
-	inet_pton(AF_INET, this->host.c_str(), &sin.sin_addr);
-//	sin.sin_addr.s_addr = htonl(this->host.c_str());
-	sin.sin_port = htons(this->port);*/
 
 	struct sockaddr_in serv_addr;
 	bzero((char *)&serv_addr, sizeof(serv_addr));
 	serv_addr.sin_family = AF_INET;
-	//serv_addr.sin_addr.s_addr = htonl(this->host.c_str());
 	inet_pton(AF_INET, this->host.c_str(), &serv_addr.sin_addr);
 	serv_addr.sin_port = htons(this->port);
-
-	/*if (!bind(udp_socket, (struct sockaddr *)&sin, sizeof(sin)) == -1)
-	{
-		cout << "Failed to bind UDP port" << endl;
-	}*/
 
 	connect(udp_socket, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
 
 	write(udp_socket, udp_message.c_str(), udp_message.length());
 	
-
 	close(udp_socket);
 #endif
 }

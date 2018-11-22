@@ -17,7 +17,19 @@
 #include "DDEvent.h"
 #include <thread>
 
-#ifndef _WIN32
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define _WINSOCKAPI_
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <Ws2tcpip.h>
+#include <inaddr.h>
+#pragma comment (lib, "Ws2_32.lib")
+
+#else
 #include <sys/time.h>
 #include <unistd.h>
 #include <sys/types.h> 
