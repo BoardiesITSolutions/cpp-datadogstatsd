@@ -13,7 +13,7 @@ library](https://github.com/DataDog/php-datadogstatsd).
 
 
 The library supports Linux, any Linux distro should work but we've tested against
-CentOS 7.4. 
+CentOS 7.4. It also supports Windows, tested on Windows 10. 
 
 ## Installation
 There is a simple makefile to allow you to build a so library file that you can
