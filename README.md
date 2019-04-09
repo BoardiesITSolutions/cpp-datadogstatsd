@@ -49,6 +49,14 @@ The first thing to do is to create an instance of the library as follows:
 ```
 DataDogStatsD dataDogStatsD;
 ```
+You can configure the agent via envionment variables. If you instantiate your the library
+where the host and the port number is not set, then it checks if `DD_AGENT_HOST` and/or 
+`DD_DOGSTATSD_PORT` and sets them appropriately. If there is no environment variable found, then
+it defaults to 127.0.0.1 and port 8125. 
+
+You can also set an environment variable called DD_ENTITY_ID. If this is provided then whenever a metric
+is submitted to datadog then the tag `dd.internal.entity_id` is applied. This is only applied though
+if the agent is running from inside a container. 
 
 ### General Notes for all Metrics
 All methods available to send metrics to your DataDog account have an optional value

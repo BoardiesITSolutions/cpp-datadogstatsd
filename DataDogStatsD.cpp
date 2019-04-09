@@ -6,24 +6,65 @@ using namespace std;
 /// <param name="api_key">Your API Key</param>
 /// <param name="app_key">Your app key</param>
 
+
+
 DataDogStatsD::DataDogStatsD()
 {
-	this->host = "127.0.0.1";
-	this->port = 8125;
+	const char* env_host = getenv("DD_AGENT_HOST");
+	const char* env_port = getenv("DD_DOGSTATSD_PORT");
+	this->dd_entity_id = getenv("DD_ENTITY_ID");
+	
+
+	if (env_host != nullptr)
+	{
+		this->host = env_host;
+	}
+	else
+	{
+		this->host = "127.0.0.1";
+	}
+	if (env_port != nullptr)
+	{
+		this->port = atoi(env_port);
+	}
+	else
+	{
+		this->port = 8125;
+	}
+
+	
 }
 
 DataDogStatsD::DataDogStatsD(std::string host, unsigned int port)
 {
 	this->host = host;
 	this->port = port;
+	this->dd_entity_id = getenv("DD_ENTITY_ID");
 }
 
 DataDogStatsD::DataDogStatsD(string api_key, string app_key)
 {
-this->api_key = api_key;
-this->app_key = app_key;
-this->host = "127.0.0.1";
-this->port = 8125;
+	this->api_key = api_key;
+	this->app_key = app_key;
+	const char* env_host = getenv("DD_AGENT_HOST");
+	const char* env_port = getenv("DD_DOGSTATSD_PORT");
+	if (env_host != nullptr)
+	{
+		this->host = env_host;
+	}
+	else
+	{
+		this->host = "127.0.0.1";
+	}
+	if (env_port != nullptr)
+	{
+		this->port = atoi(env_port);
+	}
+	else
+	{
+		this->port = 8125;
+	}
+	this->dd_entity_id = getenv("DD_ENTITY_ID");
 }
 
 /// <summary>Initialise the DogStatsD with the API and app key, customised hostname and default port of 8125</summary>
@@ -36,6 +77,8 @@ DataDogStatsD::DataDogStatsD(string api_key, string app_key, string host)
 	this->app_key = app_key;
 	this->host = host;
 	this->port = 8125;
+
+	this->dd_entity_id = getenv("DD_ENTITY_ID");
 }
 
 /// <summary>Initialise the DogStatsD with the API and app key, customised port number defaults to host localhost</summary>
@@ -48,6 +91,8 @@ DataDogStatsD::DataDogStatsD(string api_key, string app_key, unsigned int port)
 	this->app_key = app_key;
 	this->host = "127.0.0.1";
 	this->port = port;
+
+	this->dd_entity_id = getenv("DD_ENTITY_ID");
 }
 
 /// <summary>Initialise the DogStatsD with the API and app key, with customised hostname and port</summary>
@@ -61,13 +106,22 @@ DataDogStatsD::DataDogStatsD(string api_key, string app_key, string host, unsign
 	this->app_key = app_key;
 	this->host = host;
 	this->port = port;
+
+	this->dd_entity_id = getenv("DD_ENTITY_ID");
 }
 
 void DataDogStatsD::increment(const std::string& stats)
 {
 	std::vector<std::string> statsArray;
 	statsArray.push_back(stats);
-	this->updateStats(statsArray, 1, 1.0, "");
+	if (dd_entity_id == nullptr)
+	{
+		this->updateStats(statsArray, 1, 1.0, "");
+	}
+	else
+	{
+		this->updateStats(statsArray, 1, 1.0, this->returnSerializedTagsString(this->dd_entity_id_key + ":" + this->dd_entity_id));
+	}
 }
 
 void DataDogStatsD::increment(const std::string& stats, const std::string& tags)
@@ -79,7 +133,14 @@ void DataDogStatsD::increment(const std::string& stats, const std::string& tags)
 
 void DataDogStatsD::increment(const std::vector<std::string>& stats)
 {
-	this->updateStats(stats, 1, 1.0, "");
+	if (dd_entity_id == nullptr)
+	{
+		this->updateStats(stats, 1, 1.0, "");
+	}
+	else
+	{
+		this->updateStats(stats, 1, 1.0, this->returnSerializedTagsString(this->dd_entity_id_key + ":" + this->dd_entity_id));
+	}
 }
 
 void DataDogStatsD::increment(const std::vector<std::string>& stats, const std::string& tags)
@@ -91,7 +152,14 @@ void DataDogStatsD::decrement(const std::string& stats)
 {
 	std::vector<std::string> statsArray;
 	statsArray.push_back(stats);
-	this->updateStats(statsArray, -1, 1.0, "");
+	if (dd_entity_id == nullptr)
+	{
+		this->updateStats(statsArray, -1, 1.0, "");
+	}
+	else
+	{
+		this->updateStats(statsArray, 1, 1.0, this->returnSerializedTagsString(this->dd_entity_id_key + ":" + this->dd_entity_id));
+	}
 }
 
 void DataDogStatsD::decrement(const std::string& stats, const std::string& tags)
@@ -103,7 +171,14 @@ void DataDogStatsD::decrement(const std::string& stats, const std::string& tags)
 
 void DataDogStatsD::decrement(const std::vector<std::string>& stats)
 {
-	this->updateStats(stats, -1, 1.0, "");
+	if (dd_entity_id == nullptr)
+	{
+		this->updateStats(stats, -1, 1.0, "");
+	}
+	else
+	{
+		this->updateStats(stats, -1, 1.0, this->returnSerializedTagsString(this->dd_entity_id_key + ":" + this->dd_entity_id));
+	}
 }
 
 void DataDogStatsD::decrement(const std::vector<std::string>& stats, const string& tags)
@@ -113,11 +188,19 @@ void DataDogStatsD::decrement(const std::vector<std::string>& stats, const strin
 
 void DataDogStatsD::timing(const std::string& stats, float timeInSeconds)
 {
-	stringstream valueStream;
-	valueStream << (timeInSeconds) << "|ms";
-	std::map<std::string, std::string> data;
-	data[stats] = valueStream.str();
-	this->send(data, 1.0);
+	if (dd_entity_id == nullptr)
+	{
+
+		stringstream valueStream;
+		valueStream << (timeInSeconds) << "|ms";
+		std::map<std::string, std::string> data;
+		data[stats] = valueStream.str();
+		this->send(data, 1.0);
+	}
+	else
+	{
+		this->timing(stats, timeInSeconds, this->returnSerializedTagsString(this->dd_entity_id_key + ":" + this->dd_entity_id));
+	}
 }
 
 void DataDogStatsD::timing(const std::string& stats, float timeInSeconds, const std::string& tags)
@@ -133,12 +216,19 @@ void DataDogStatsD::timing(const std::string& stats, float timeInSeconds, const 
 
 void DataDogStatsD::gauge(const std::string& stats, float value)
 {
-	stringstream valueStream;
-	valueStream << (value) << "|g";
+	if (dd_entity_id == nullptr)
+	{
+		stringstream valueStream;
+		valueStream << (value) << "|g";
 
-	std::map<std::string, std::string> data;
-	data[stats] = valueStream.str();
-	this->send(data, 1.0);
+		std::map<std::string, std::string> data;
+		data[stats] = valueStream.str();
+		this->send(data, 1.0);
+	}
+	else
+	{
+		this->gauge(stats, value, this->returnSerializedTagsString(this->dd_entity_id_key + ":" + this->dd_entity_id));
+	}
 }
 
 void DataDogStatsD::gauge(const std::string&stats, float value, const std::string& tags)
@@ -153,12 +243,19 @@ void DataDogStatsD::gauge(const std::string&stats, float value, const std::strin
 
 void DataDogStatsD::histogram(const std::string& stats, float value)
 {
-	stringstream valueStream;
-	valueStream << (value) << "|h";
+	if (dd_entity_id == nullptr)
+	{
+		stringstream valueStream;
+		valueStream << (value) << "|h";
 
-	std::map<std::string, std::string> data;
-	data[stats] = valueStream.str();
-	this->send(data, 1.0);
+		std::map<std::string, std::string> data;
+		data[stats] = valueStream.str();
+		this->send(data, 1.0);
+	}
+	else
+	{
+		this->histogram(stats, value, this->returnSerializedTagsString(this->dd_entity_id_key + ":" + this->dd_entity_id));
+	}
 }
 
 void DataDogStatsD::histogram(const std::string& stats, float value, const std::string& tags)
@@ -173,12 +270,19 @@ void DataDogStatsD::histogram(const std::string& stats, float value, const std::
 
 void DataDogStatsD::set(const std::string& stats, float value)
 {
-	stringstream valueStream;
-	valueStream << (value) << "|s";
+	if (dd_entity_id == nullptr)
+	{
+		stringstream valueStream;
+		valueStream << (value) << "|s";
 
-	std::map<std::string, std::string> data;
-	data[stats] = valueStream.str();
-	this->send(data, 1.0);
+		std::map<std::string, std::string> data;
+		data[stats] = valueStream.str();
+		this->send(data, 1.0);
+	}
+	else
+	{
+		this->set(stats, value, this->returnSerializedTagsString(this->dd_entity_id_key + ":" + this->dd_entity_id));
+	}
 }
 
 void DataDogStatsD::set(const std::string& stats, float value, const std::string& tags)
@@ -402,7 +506,6 @@ void DataDogStatsD::sendDDEventinthread(DDEvent ddEvent, void(*eventCallback)(bo
 	{
 		string error = curl_easy_strerror(res);
 		eventCallback(false, error);
-		//cout << "Failed to perform curl: " << error << endl;
 		curl_slist_free_all(list);
 		curl_easy_cleanup(curl);
 		httpEventThreadStarted = false;
@@ -480,7 +583,20 @@ string DataDogStatsD::returnSerializedTagsString(std::string tags)
 {
 	stringstream valueStream;
 	valueStream << "|#" << tags;
-	return valueStream.str();
+	if (dd_entity_id != nullptr)
+	{
+		valueStream << "," << this->dd_entity_id_key << ":" << this->dd_entity_id << ",";
+	}
+	string serialisedTags = valueStream.str();
+	if (serialisedTags.at(0) == ',')
+	{
+		serialisedTags = serialisedTags.substr(1);
+	}
+	if (serialisedTags.at(serialisedTags.length() - 1) == ',')
+	{
+		serialisedTags.pop_back();
+	}
+	return serialisedTags;
 }
 
 string DataDogStatsD::returnSerializedTagsString(std::vector<std::string> tags)
@@ -498,13 +614,27 @@ string DataDogStatsD::returnSerializedTagsString(std::vector<std::string> tags)
 		valueStream << i << ":" << *it << ",";
 		i++;
 	}
+
+	const char * dd_entity_id = getenv("DD_ENTITY_ID");
+	if (dd_entity_id != nullptr)
+	{
+		valueStream << this->dd_entity_id_key << this->dd_entity_id << ",";
+	}
+
 	string value = valueStream.str();
 	value.pop_back();
+
 	return value;
 }
 	
 string DataDogStatsD::returnSerializedTagsString(std::map<std::string, std::string> tags)
 {
+	//Check if the envionment variable is set for entity id. If it is then add this to the tags
+	const char * dd_entity_id = getenv("DD_ENTITY_ID");
+	if (dd_entity_id != nullptr)
+	{
+		tags[this->dd_entity_id_key] = this->dd_entity_id;
+	}
 	stringstream valueStream;
 	valueStream << "|#";
 	int i = 0;

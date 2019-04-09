@@ -98,6 +98,8 @@ private:
 	std::thread *http_event_thread = NULL;
 	CURL *initCurl(DDEvent ddEvent, std::string *response, struct curl_slist *list, const char* jsonString);
 	bool httpEventThreadStarted = false;
+	const std::string dd_entity_id_key = "dd.internal.entity_id";
+	const char * dd_entity_id;
 };
 
 #endif
