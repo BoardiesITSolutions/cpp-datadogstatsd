@@ -12,9 +12,9 @@
 #include <sstream>
 #include <iostream>
 #include <string.h>
-#include "Helpers.h"
+#include "datadogstatsd/Helpers.h"
 #include <time.h>
-#include "DDEvent.h"
+#include "datadogstatsd/DDEvent.h"
 #include <thread>
 
 #ifdef _WIN32
@@ -32,7 +32,7 @@
 #else
 #include <sys/time.h>
 #include <unistd.h>
-#include <sys/types.h> 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -52,8 +52,8 @@ public:
 	DataDogStatsD(std::string api_key, std::string app_key, unsigned int port);
 	DataDogStatsD(std::string api_key, std::string app_key, std::string host, unsigned int port);
 
-	void increment(const std::string& stats);
-	void increment(const std::string& stats, const std::string& tags);
+	void increment(const std::string& stats, int value=1);
+	void increment(const std::string& stats, const std::string& tags, int value=1);
 	void increment(const std::vector<std::string>& stats);
 	void increment(const std::vector<std::string>& stats, const std::string& tags);
 
@@ -61,7 +61,7 @@ public:
 	void decrement(const std::string& stats, const std::string& tags);
 	void decrement(const std::vector<std::string>& stats);
 	void decrement(const std::vector<std::string>& stats, const std::string& tags);
-	
+
 	void timing(const std::string& stats, float timeInSeconds);
 	void timing(const std::string& stats, float timeInSeconds, const std::string& tags);
 
@@ -73,7 +73,7 @@ public:
 
 	void set(const std::string& stats, float value);
 	void set(const std::string& stats, float value, const std::string& tags);
-	
+
 	std::string returnSerializedTagsString(std::string tags);
 	std::string returnSerializedTagsString(std::vector<std::string> tags);
 	std::string returnSerializedTagsString(std::map<std::string, std::string> tags);
@@ -83,7 +83,7 @@ public:
 	bool event(DDEvent ddEvent, bool nonBlockingMode, void(*eventCallback)(bool result, std::string error) = nullptr);
 
 	void(*eventCallback)(bool, std::string);
-	
+
 	long getTimeInMicroSeconds();
 private:
 	std::string api_key;

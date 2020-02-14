@@ -1,4 +1,4 @@
-#include "DDEvent.h"
+#include "datadogstatsd/DDEvent.h"
 
 using namespace std;
 
@@ -94,7 +94,7 @@ string DDEvent::returnDDEventUDPString()
 	if (!this->text.empty())
 	{
 		string tempString = this->text;
-		
+
 		this->stringReplace(tempString, "\n", "\\n");
 		fields << "|" << tempString;
 	}
@@ -102,12 +102,12 @@ string DDEvent::returnDDEventUDPString()
 	{
 		fields << "|";
 	}
-	
+
 	if (!this->dateHappened.empty())
 	{
 		fields << "|d:" << this->dateHappened;
 	}
-	
+
 	if (!this->host.empty())
 	{
 		fields << "|h:" << this->host;
@@ -122,7 +122,7 @@ string DDEvent::returnDDEventUDPString()
 	{
 		fields << "|p:" << this->getPriorityStringFromEnum(this->priority);
 	}
-	
+
 	if (this->alertType != DDEvent::AlertType::NOT_SET)
 	{
 		fields << "|t:" << this->getAlertTypeStringFromEnum(this->alertType);
@@ -198,7 +198,7 @@ void DDEvent::getDDEventAsJSONString(std::string *jsonString)
 	buffer.Clear();
 	rapidjson::Writer<rapidjson::StringBuffer>writer(buffer);
 	document.Accept(writer);
-	
+
 	*jsonString = buffer.GetString();
 
 }

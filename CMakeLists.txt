@@ -5,7 +5,8 @@ set( CMAKE_CXX_STANDARD 11 )
 set( SOURCE
   DataDogStatsD.cpp
   Helpers.cpp )
-  
+include_directories(include)
+
 add_library( ${PROJECT_NAME}_shared SHARED ${SOURCE} )
 set_target_properties( ${PROJECT_NAME}_shared PROPERTIES
   OUTPUT_NAME ${PROJECT_NAME}
@@ -14,4 +15,3 @@ set_target_properties( ${PROJECT_NAME}_shared PROPERTIES
 add_library( ${PROJECT_NAME}_static STATIC ${SOURCE} )
 set_target_properties( ${PROJECT_NAME}_static PROPERTIES
   OUTPUT_NAME ${PROJECT_NAME} )
-

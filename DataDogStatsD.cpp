@@ -1,4 +1,4 @@
-#include "DataDogStatsD.h"
+#include "datadogstatsd/DataDogStatsD.h"
 
 using namespace std;
 
@@ -13,7 +13,7 @@ DataDogStatsD::DataDogStatsD()
 	const char* env_host = getenv("DD_AGENT_HOST");
 	const char* env_port = getenv("DD_DOGSTATSD_PORT");
 	this->dd_entity_id = getenv("DD_ENTITY_ID");
-	
+
 
 	if (env_host != nullptr)
 	{
@@ -32,7 +32,7 @@ DataDogStatsD::DataDogStatsD()
 		this->port = 8125;
 	}
 
-	
+
 }
 
 DataDogStatsD::DataDogStatsD(std::string host, unsigned int port)
@@ -110,25 +110,25 @@ DataDogStatsD::DataDogStatsD(string api_key, string app_key, string host, unsign
 	this->dd_entity_id = getenv("DD_ENTITY_ID");
 }
 
-void DataDogStatsD::increment(const std::string& stats)
+void DataDogStatsD::increment(const std::string& stats, int count)
 {
 	std::vector<std::string> statsArray;
 	statsArray.push_back(stats);
 	if (dd_entity_id == nullptr)
 	{
-		this->updateStats(statsArray, 1, 1.0, "");
+		this->updateStats(statsArray, count, 1.0, "");
 	}
 	else
 	{
-		this->updateStats(statsArray, 1, 1.0, this->returnSerializedTagsString(this->dd_entity_id_key + ":" + this->dd_entity_id));
+		this->updateStats(statsArray, count, 1.0, this->returnSerializedTagsString(this->dd_entity_id_key + ":" + this->dd_entity_id));
 	}
 }
 
-void DataDogStatsD::increment(const std::string& stats, const std::string& tags)
+void DataDogStatsD::increment(const std::string& stats, const std::string& tags, int count)
 {
 	std::vector<std::string> statsArray;
 	statsArray.push_back(stats);
-	this->updateStats(statsArray, 1, 1.0, tags);
+	this->updateStats(statsArray, count, 1.0, tags);
 }
 
 void DataDogStatsD::increment(const std::vector<std::string>& stats)
@@ -302,7 +302,7 @@ void DataDogStatsD::updateStats(std::vector<std::string> stats, int delta, float
 	//Loop over the stats and create the multi dimension array of stat => value
 	for (std::vector<std::string>::iterator it = stats.begin(); it != stats.end(); ++it)
 	{
-		data[*it] = "1|c";
+		data[*it] = std::to_string(delta) + "|c";
 	}
 
 	this->send(data, sampleRate, tags);
@@ -417,7 +417,7 @@ bool DataDogStatsD::event(DDEvent ddEvent, bool nonBlockingMode, void(*eventCall
 			}
 			curl_slist_free_all(list);
 			curl_easy_cleanup(curl);
-			
+
 			return false;
 		}
 		else
@@ -574,7 +574,7 @@ void DataDogStatsD::flush(string& udp_message)
 	connect(udp_socket, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
 
 	write(udp_socket, udp_message.c_str(), udp_message.length());
-	
+
 	close(udp_socket);
 #endif
 }
@@ -626,7 +626,7 @@ string DataDogStatsD::returnSerializedTagsString(std::vector<std::string> tags)
 
 	return value;
 }
-	
+
 string DataDogStatsD::returnSerializedTagsString(std::map<std::string, std::string> tags)
 {
 	//Check if the envionment variable is set for entity id. If it is then add this to the tags
