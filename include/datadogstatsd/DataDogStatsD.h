@@ -52,8 +52,8 @@ public:
 	DataDogStatsD(std::string api_key, std::string app_key, unsigned int port);
 	DataDogStatsD(std::string api_key, std::string app_key, std::string host, unsigned int port);
 
-	void increment(const std::string& stats);
-	void increment(const std::string& stats, const std::string& tags);
+	void increment(const std::string& stats, int value=1);
+	void increment(const std::string& stats, const std::string& tags, int value=1);
 	void increment(const std::vector<std::string>& stats);
 	void increment(const std::vector<std::string>& stats, const std::string& tags);
 
