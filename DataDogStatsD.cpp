@@ -1,4 +1,4 @@
-#include "DataDogStatsD.h"
+#include "datadogstatsd/DataDogStatsD.h"
 
 using namespace std;
 
@@ -13,7 +13,7 @@ DataDogStatsD::DataDogStatsD()
 	const char* env_host = getenv("DD_AGENT_HOST");
 	const char* env_port = getenv("DD_DOGSTATSD_PORT");
 	this->dd_entity_id = getenv("DD_ENTITY_ID");
-	
+
 
 	if (env_host != nullptr)
 	{
@@ -32,7 +32,7 @@ DataDogStatsD::DataDogStatsD()
 		this->port = 8125;
 	}
 
-	
+
 }
 
 DataDogStatsD::DataDogStatsD(std::string host, unsigned int port)
@@ -417,7 +417,7 @@ bool DataDogStatsD::event(DDEvent ddEvent, bool nonBlockingMode, void(*eventCall
 			}
 			curl_slist_free_all(list);
 			curl_easy_cleanup(curl);
-			
+
 			return false;
 		}
 		else
@@ -574,7 +574,7 @@ void DataDogStatsD::flush(string& udp_message)
 	connect(udp_socket, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
 
 	write(udp_socket, udp_message.c_str(), udp_message.length());
-	
+
 	close(udp_socket);
 #endif
 }
@@ -626,7 +626,7 @@ string DataDogStatsD::returnSerializedTagsString(std::vector<std::string> tags)
 
 	return value;
 }
-	
+
 string DataDogStatsD::returnSerializedTagsString(std::map<std::string, std::string> tags)
 {
 	//Check if the envionment variable is set for entity id. If it is then add this to the tags
