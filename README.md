@@ -313,5 +313,8 @@ If you wish to contribute to this project, then great, check our [contribution g
 
 # Contributors
 anderssjoblom-vertex - https://github.com/anderssjoblom-vertex
+
 niamster - https://github.com/niamster
+
 justinkamerman - https://github.com/justinkamerman
+
