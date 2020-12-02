@@ -310,3 +310,8 @@ submit it via our issue tracker at https://support.boardiesitsolutions.com/issue
 
 # Contributions
 If you wish to contribute to this project, then great, check our [contribution guidelines](CONTRIBUTING.md)
+
+# Contributors
+anderssjoblom-vertex - https://github.com/anderssjoblom-vertex
+niamster - https://github.com/niamster
+justinkamerman - https://github.com/justinkamerman
