@@ -552,7 +552,11 @@ void DataDogStatsD::flush(string& udp_message)
 		result = ::connect(sock, (SOCKADDR *)&service, sizeof(service));
 		if (result != SOCKET_ERROR)
 		{
-			::send(sock, udp_message.c_str(), udp_message.length(), 0);
+			int bytes_written= ::send(sock, udp_message.c_str(), udp_message.length(), 0);
+			// What to do if the message wasn't fully sent?
+			if (bytes_written < (int)udp_message.length()) {
+			}
+
 			closesocket(sock);
 			WSACleanup();
 		}
@@ -573,7 +577,10 @@ void DataDogStatsD::flush(string& udp_message)
 
 	connect(udp_socket, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
 
-	write(udp_socket, udp_message.c_str(), udp_message.length());
+	ssize_t bytes_written= write(udp_socket, udp_message.c_str(), udp_message.length());
+	// What to do if the message wasn't fully sent?
+	if (bytes_written < (ssize_t)udp_message.length()) {
+	}
 
 	close(udp_socket);
 #endif
