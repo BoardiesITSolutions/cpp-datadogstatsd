@@ -6,7 +6,7 @@ curl_include = /usr/include/curl
 rapidjson_inc_path = /usr/include/rapidjson
 
 OBJECTS = $(SOURCES:.cpp=.o)
-CFLAGS = -fpic -c $(SOURCES) -Wall -g -Iincludes -std=c++11 -I/usr/include -I$(curl_include) -I$(rapidjson_inc_path)
+CFLAGS = -fpic -c $(SOURCES) -Wall -g -Iinclude -std=c++11 -I/usr/include -I$(curl_include) -I$(rapidjson_inc_path)
 CC = g++
 LDFLAGS = -lpthread -pthread -lm -L/usr/lib64/
 
